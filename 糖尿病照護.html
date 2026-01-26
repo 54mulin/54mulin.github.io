@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>糖尿病照護：ABCDEFGHI 撲克牌挑戰賽</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-orange: #FF7043;
+            --primary-dark: #D84315;
+            --secondary-teal: #26A69A;
+            --bg-color: #FFF3E0;
+            --text-dark: #3E2723;
+            --success: #66BB6A;
+            --error: #EF5350;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            margin: 0; padding: 0; background-color: #FFE0B2; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; font-family: 'Noto Sans TC', sans-serif; padding: 10px;
+            transition: background-color 0.3s;
+        }
+
+        body.screen-error { background-color: #FFCDD2; }
+
+        #app-container {
+            width: 100%; max-width: 1200px; height: 90vh; max-height: 850px;
+            background-color: #ffffff; border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(62, 39, 35, 0.2);
+            position: relative; overflow: hidden; display: flex; flex-direction: column;
+            border: 4px solid #ffffff;
+        }
+
+        #progress-container { width: 100%; height: 8px; background: #EEE; position: absolute; top: 0; z-index: 100; }
+        #progress-bar { height: 100%; background: var(--secondary-teal); width: 0%; transition: width 0.5s ease; }
+
+        .slide {
+            width: 100%; height: 100%; padding: 20px; display: none; flex-direction: column;
+            animation: slideIn 0.4s ease; overflow-y: auto;
+            background-image: radial-gradient(#FFCCBC 1px, transparent 1px); background-size: 30px 30px;
+        }
+        .slide.active { display: flex; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .slide-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 3px solid #FFCCBC; padding-bottom: 10px; flex-shrink: 0; }
+        .letter-icon {
+            width: 50px; height: 50px; background: var(--primary-orange); color: white; border-radius: 12px;
+            font-size: 28px; font-weight: bold; display: flex; justify-content: center; align-items: center;
+            font-family: 'Fredoka', sans-serif; box-shadow: 3px 3px 0px var(--primary-dark);
+        }
+        .slide-title { font-size: clamp(22px, 5vw, 36px); font-weight: 700; color: var(--text-dark); margin: 0; }
+
+        .question-box { background: #FFF; border: 3px dashed var(--primary-orange); border-radius: 15px; padding: 15px 20px; font-size: clamp(18px, 4vw, 24px); color: var(--text-dark); margin-bottom: 20px; }
+
+        .poker-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; padding-bottom: 20px; }
+        @media (min-width: 768px) { .poker-grid { grid-template-columns: repeat(4, 1fr); } }
+
+        .poker-card {
+            background: white; min-height: 200px; border-radius: 15px; border: 4px solid #E0E0E0;
+            box-shadow: 0 5px 0px #CFD8DC; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; padding: 10px; position: relative; transition: all 0.2s; cursor: pointer;
+        }
+        .poker-card.correct { border-color: var(--success); background-color: #E8F5E9; pointer-events: none; }
+        .poker-card.wrong { border-color: var(--error); animation: shake 0.4s; background-color: #FFEBEE; }
+
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+
+        .card-corner { position: absolute; font-size: 18px; font-weight: bold; top: 10px; left: 10px; }
+        .card-icon { font-size: 45px; margin-bottom: 10px; }
+        .card-text { font-size: 20px; font-weight: 700; text-align: center; }
+
+        .edu-container { display: flex; flex-direction: column; gap: 20px; align-items: center; }
+        @media (min-width: 768px) { .edu-container { flex-direction: row; align-items: stretch; } }
+        .edu-visual { width: 120px; height: 120px; background: #FFF; border-radius: 20px; border: 4px solid var(--secondary-teal); display: flex; justify-content: center; align-items: center; font-size: 60px; color: var(--secondary-teal); flex-shrink: 0; }
+        @media (min-width: 768px) { .edu-visual { width: 250px; height: auto; font-size: 100px; } }
+        .edu-text { background: rgba(255,255,255,0.9); padding: 20px; border-radius: 20px; border-left: 8px solid var(--primary-orange); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .edu-text h2 { color: var(--primary-dark); font-size: 28px; margin-top: 0; }
+
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
+        .overlay.active { display: flex; }
+        .status-modal { background: white; padding: 30px; border-radius: 25px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 15px 50px rgba(0,0,0,0.3); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-correct { border: 8px solid var(--success); }
+        .modal-wrong { border: 8px solid var(--error); }
+        .status-modal i { font-size: 60px; margin-bottom: 15px; }
+        .modal-correct i { color: var(--success); }
+        .modal-wrong i { color: var(--error); }
+
+        .close-btn { margin-top: 20px; padding: 12px 35px; border-radius: 50px; border: none; color: white; font-weight: bold; font-size: 20px; cursor: pointer; width: 100%; }
+        .btn-error { background: var(--error); box-shadow: 0 4px 0 #C62828; }
+        .btn-success { background: var(--success); box-shadow: 0 4px 0 #2E7D32; }
+
+        .checklist { display: flex; flex-direction: column; gap: 10px; }
+        .check-item { background: white; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 15px; font-size: 16px; border: 2px solid #EEE; cursor: pointer; }
+        .check-item.checked { background: #E8F5E9; border-color: var(--success); }
+        .check-circle { width: 30px; height: 30px; flex-shrink: 0; border: 2px solid #CCC; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; }
+        .check-item.checked .check-circle { background: var(--success); border-color: var(--success); }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <div id="progress-container"><div id="progress-bar"></div></div>
+
+    <div class="slide active" id="slide-0" style="justify-content: center; align-items: center; text-align: center; background: linear-gradient(135deg, #FF7043 0%, #FFAB91 100%);">
+        <div style="background: white; padding: 40px; border-radius: 30px; width: 90%;">
+            <div style="font-size: 80px;">🃏</div>
+            <h1 style="color: var(--primary-dark)">糖尿病照護</h1>
+            <h2 style="font-size: 20px; color: #5D4037;">ABCDEFGHI 挑戰賽</h2>
+            <button class="close-btn btn-success" style="width:auto" onclick="nextSlide()">開始挑戰</button>
+        </div>
+    </div>
+
+    <div class="slide" id="slide-1">
+        <div class="slide-header"><div class="letter-icon">A</div><h2 class="slide-title">糖化血色素 (A1C)</h2></div>
+        <div class="question-box">Q：為了減少併發症，糖友的「糖化血色素」建議控制在多少以下？</div>
+        <div class="poker-grid">
+            <div class="poker-card" onclick="checkAnswer(this, false, '10% 太高了！這會嚴重傷害血管。')"><div class="card-corner">10</div><span class="card-icon">🍭</span><span class="card-text">10.0 %</span></div>
+            <div class="poker-card" onclick="checkAnswer(this, true, '賓果！7.0% 是減少併發症的黃金標準！')"><div class="card-corner">7</div><span class="card-icon">🎯</span><span class="card-text">7.0 %</span></div>
+            <div class="poker-card" onclick="checkAnswer(this, false, '9% 屬於控制不佳，容易產生併發症。')"><div class="card-corner">9</div><span class="card-icon">⚠️</span><span class="card-text">9.0 %</span></div>
+            <div class="poker-card" onclick="checkAnswer(this, false, '血糖控制不能憑感覺喔。')"><div class="card-corner">?</div><span class="card-icon">🤷</span><span class="card-text">看心情</span></div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide-2">
+        <div class="slide-header"><div class="letter-icon">A</div><h2 class="slide-title">解密：A1C 控糖密碼</h2></div>
+        <div class="edu-container">
+            <div class="edu-visual"><i class="fa-solid fa-chart-line"></i></div>
+            <div class="edu-text">
+                <h2>目標：低於 7.0%</h2>
+                <p>每降低 1%，就能大幅減少眼睛、腎臟及神經病變風險。</p>
+                <button class="close-btn btn-success" onclick="nextSlide()">下一步 (B 關卡)</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide-3">
+        <div class="slide-header"><div class="letter-icon" style="background:#26A69A;">B</div><h2 class="slide-title">血壓 (BP)</h2></div>
+        <div class="question-box">Q：為了保護心腎，理想血壓應控制在？</div>
+        <div class="poker-grid">
+            <div class="poker-card" onclick="checkAnswer(this, true, '正確！130/80 是保護器官的標準。')"><span class="card-icon">🏡</span><span class="card-text">130/80</span></div>
+            <div class="poker-card" onclick="checkAnswer(this, false, '160/100 太高了！')"><span class="card-icon">💥</span><span class="card-text">160/100</span></div>
+            <div class="poker-card" onclick="checkAnswer(this, false, '140/90 還可以再低一點。')"><span class="card-icon">⚖️</span><span class="card-text">140/90</span></div>
+            <div class="poker-card" onclick="checkAnswer(this, false, '要量血壓喔！')"><span class="card-icon">🙈</span><span class="card-text">不用量</span></div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide-4">
+        <div class="slide-header"><div class="letter-icon" style="background:#26A69A;">B</div><h2 class="slide-title">解密：血壓管理</h2></div>
+        <div class="edu-container">
+            <div class="edu-visual"><i class="fa-solid fa-heart-pulse"></i></div>
+            <div class="edu-text">
+                <h2>目標：130 / 80 mmHg</h2>
+                <p>控制血壓甚至比控制血糖更能預防心血管病變。</p>
+                <button class="close-btn btn-success" onclick="nextSlide()">下一步 (C 關卡)</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide-5">
+        <div class="slide-header"><div class="letter-icon" style="background:#AB47BC;">C</div><h2 class="slide-title">膽固醇 (LDL)</h2></div>
+        <div class="question-box">Q：壞膽固醇 (LDL) 應低於多少？</div>
+        <div class="poker-grid">
+            <div class="poker-card" onclick="checkAnswer(this, false, '太高了！血管會塞住。')"><span class="card-icon">🍔</span><span class="card-text">130</span></div>
+            <div class="poker-card" onclick="checkAnswer(this, true, '正確！降低心肌梗塞風險。')"><span class="card-icon">✅</span><span class="card-text">100</span></div>
+            <div class="poker-card" onclick="checkAnswer(this, false, '非常危險！')"><span class="card-icon">🚑</span><span class="card-text">160</span></div>
+            <div class="poker-card" onclick="checkAnswer(this, false, '抽血才知道。')"><span class="card-icon">💨</span><span class="card-text">憑感覺</span></div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide-6">
+        <div class="slide-header"><div class="letter-icon" style="background:#AB47BC;">C</div><h2 class="slide-title">解密：血脂防護</h2></div>
+        <div class="edu-container">
+            <div class="edu-visual"><i class="fa-solid fa-vial"></i></div>
+            <div class="edu-text">
+                <h2>目標：LDL < 100</h2>
+                <p>壞膽固醇堆積會造成狹窄。降低它能保護心臟。</p>
+                <button class="close-btn btn-success" onclick="nextSlide()">下一步 (D 關卡)</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide-7">
+        <div class="slide-header"><div class="letter-icon" style="background:#66BB6A;">D</div><h2 class="slide-title">飲食 (Diet)</h2></div>
+        <div class="question-box">Q：「211 健康餐盤」比例是？</div>
+        <div class="poker-grid">
+            <div class="poker-card" onclick="checkAnswer(this, false, '飯太多了。')"><span class="card-icon">🍚</span><span class="card-text">飯佔一半</span></div>
+            <div class="poker-card" onclick="checkAnswer(this, false, '肉太多了。')"><span class="card-icon">🥩</span><span class="card-text">肉佔一半</span></div>
+            <div class="poker-card" onclick="checkAnswer(this, true, '正確！蔬菜能穩定血糖。')"><span class="card-icon">🥦</span><span class="card-text">菜佔一半</span></div>
+            <div class="poker-card" onclick="checkAnswer(this, false, '不吃飯會低血糖。')"><span class="card-icon">🚫</span><span class="card-text">不吃飯</span></div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide-8">
+        <div class="slide-header"><div class="letter-icon" style="background:#66BB6A;">D</div><h2 class="slide-title">解密：211 餐盤</h2></div>
+        <div class="edu-container">
+            <div class="edu-visual"><i class="fa-solid fa-plate-wheat"></i></div>
+            <div class="edu-text">
+                <h2>2菜、1飯、1肉</h2>
+                <p>先吃菜、再吃肉、最後吃飯，有效穩定飯後血糖。</p>
+                <button class="close-btn btn-success" onclick="nextSlide()">下一步 (E 關卡)</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide-9">
+        <div class="slide-header"><div class="letter-icon" style="background:#29B6F6;">E</div><h2 class="slide-title">運動 (Exercise)</h2></div>
+        <div class="question-box">Q：每週建議中強度運動多久？</div>
+        <div class="poker-grid">
+            <div class="poker-card" onclick="checkAnswer(this, true, '正確！每週 150 分鐘。', true)"><span class="card-icon">⏱️</span><span class="card-text">150 分鐘</span></div>
+            <div class="poker-card" onclick="checkAnswer(this, false, '太少囉！')"><span class="card-icon">🛌</span><span class="card-text">10 分鐘</span></div>
+            <div class="poker-card" onclick="checkAnswer(this, false, '勞動非運動。')"><span class="card-icon">🧹</span><span class="card-text">做家事</span></div>
+            <div class="poker-card" onclick="checkAnswer(this, false, '量力而為。')"><span class="card-icon">🏋️</span><span class="card-text">馬拉松</span></div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide-10">
+        <div class="slide-header"><div class="letter-icon" style="background:#5C6BC0;">總</div><h2 class="slide-title">ABCDEFGHI 完整清單</h2></div>
+        <div class="checklist">
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle"><i class="fa-solid fa-check"></i></div><div>F 足部：每天檢查腳部有無傷口</div></div>
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle"><i class="fa-solid fa-check"></i></div><div>G 血糖：規律自我監測血糖</div></div>
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle"><i class="fa-solid fa-check"></i></div><div>H 健康：戒菸、打疫苗</div></div>
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle"><i class="fa-solid fa-check"></i></div><div>I 個別：討論專屬治療目標</div></div>
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle"><i class="fa-solid fa-check"></i></div><div>E 眼底：每年眼底視網膜檢查</div></div>
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle"><i class="fa-solid fa-check"></i></div><div>Kidney 腎臟：每年檢查尿液</div></div>
+        </div>
+        <button class="close-btn btn-success" style="margin: 30px auto;" onclick="finishGame()">查看最終結果</button>
+    </div>
+
+    <div class="slide" id="slide-11" style="justify-content: center; align-items: center; text-align: center;">
+        <div style="background: white; padding: 40px; border-radius: 30px;">
+            <div style="font-size: 80px;">🏆</div>
+            <h1 style="color: var(--primary-dark)">控糖大師！</h1>
+            <p>只要記住 ABCDEFGHI，健康就在您手中！</p>
+            <button class="close-btn btn-success" onclick="location.reload()">再玩一次</button>
+        </div>
+    </div>
+</div>
+
+<div class="overlay" id="modal-overlay">
+    <div id="modal-success" class="status-modal modal-correct" style="display:none;">
+        <i class="fa-solid fa-circle-check"></i><h3 id="success-title">太棒了！</h3><p id="success-msg"></p>
+        <button class="close-btn btn-success" id="success-confirm-btn" onclick="confirmSuccess()">我知道了</button>
+    </div>
+    <div id="modal-error" class="status-modal modal-wrong" style="display:none;">
+        <i class="fa-solid fa-circle-xmark"></i><h3>再想一想...</h3><p id="error-msg"></p>
+        <button class="close-btn btn-error" onclick="closeModal()">我會注意的</button>
+    </div>
+</div>
+
+<script>
+    let currentSlide = 0;
+    const totalSlides = 11; // 總共有 11 個 Slide (0 到 11)
+
+    function updateProgress() {
+        const percentage = (currentSlide / totalSlides) * 100;
+        document.getElementById('progress-bar').style.width = percentage + '%';
+    }
+
+    function nextSlide() {
+        // 先隱藏目前的
+        const currentEl = document.getElementById(`slide-${currentSlide}`);
+        if (currentEl) currentEl.classList.remove('active');
+        
+        // 增加計數
+        currentSlide++;
+        
+        // 顯示下一個
+        const nextEl = document.getElementById(`slide-${currentSlide}`);
+        if (nextEl) {
+            nextEl.classList.add('active');
+            updateProgress();
+        }
+    }
+
+    function checkAnswer(element, isCorrect, message, isLastQuestion = false) {
+        if (element.parentElement.querySelector('.correct')) return;
+        const overlay = document.getElementById('modal-overlay');
+        overlay.classList.add('active');
+
+        if (isCorrect) {
+            element.classList.add('correct');
+            document.getElementById('modal-success').style.display = 'block';
+            document.getElementById('modal-error').style.display = 'none';
+            document.getElementById('success-msg').innerText = message;
+            document.getElementById('success-confirm-btn').innerText = isLastQuestion ? "查看清單結果" : "觀看解密";
+        } else {
+            element.classList.add('wrong');
+            document.body.classList.add('screen-error');
+            document.getElementById('modal-error').style.display = 'block';
+            document.getElementById('modal-success').style.display = 'none';
+            document.getElementById('error-msg').innerText = message;
+            window.lastWrongCard = element;
+        }
+    }
+
+    function confirmSuccess() { closeModal(); nextSlide(); }
+    function closeModal() {
+        document.getElementById('modal-overlay').classList.remove('active');
+        document.body.classList.remove('screen-error');
+        if (window.lastWrongCard) { window.lastWrongCard.classList.remove('wrong'); window.lastWrongCard = null; }
+    }
+    function toggleCheck(item) { item.classList.toggle('checked'); }
+    function finishGame() { nextSlide(); }
+
+    updateProgress();
+</script>
+</body>
+</html>
